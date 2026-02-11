@@ -1,63 +1,94 @@
-(function(){
+(function () {
 
-window.RazorpayGateway = {
+  if (window.RazorpayGateway) return;
 
-startPayment: async function(config){
+  window.RazorpayGateway = {
 
-const res = await fetch(config.backendUrl + "/create-order", {
+    startPayment: async function(config) {
 
-method: "POST",
+      const backendUrl = config.backendUrl || "http://localhost:4343";
 
-headers: {
+      const orderResponse = await fetch(`${backendUrl}/create-order`, {
 
-"Content-Type": "application/json"
+        method: "POST",
 
-},
+        headers: {
 
-body: JSON.stringify({
+          "Content-Type": "application/json"
 
-amount: config.amount
+        },
 
-})
+        body: JSON.stringify({
 
-});
+          projectId: config.projectId,
 
-const order = await res.json();
+          amount: config.amount
 
-const options = {
+        })
 
-key: order.key,
+      });
 
-amount: order.amount * 100,
+      const order = await orderResponse.json();
 
-currency: "INR",
+      const options = {
 
-order_id: order.orderId,
+        key: order.key,
 
-handler: function(){
+        amount: config.amount * 100,
 
-window.location.href = config.successUrl;
+        currency: "INR",
 
-},
+        order_id: order.orderId,
 
-modal: {
+        handler: async function (response) {
 
-ondismiss: function(){
+          const verifyResponse = await fetch(`${backendUrl}/verify-payment`, {
 
-window.location.href = config.cancelUrl;
+            method: "POST",
 
-}
+            headers: {
 
-}
+              "Content-Type": "application/json"
 
-};
+            },
 
-const rzp = new Razorpay(options);
+            body: JSON.stringify(response)
 
-rzp.open();
+          });
 
-}
+          const verifyData = await verifyResponse.json();
 
-};
+          if (verifyData.success) {
+
+            window.location.href = config.successUrl;
+
+          }
+          else {
+
+            window.location.href = config.cancelUrl;
+
+          }
+
+        },
+
+        modal: {
+
+          ondismiss: function () {
+
+            window.location.href = config.cancelUrl;
+
+          }
+
+        }
+
+      };
+
+      const rzp = new Razorpay(options);
+
+      rzp.open();
+
+    }
+
+  };
 
 })();

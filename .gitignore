@@ -1,5 +1,5 @@
 # ==========================================
-# ENVIRONMENT VARIABLES (VERY IMPORTANT)
+# ENVIRONMENT VARIABLES (CRITICAL SECURITY)
 # ==========================================
 
 .env
@@ -7,18 +7,54 @@
 .env.development
 .env.production
 
-# Never upload secret keys
 backend/.env
 razorpay-payment-gateway/backend/.env
+stripe-payment-gateway/backend/.env
+
+# Allow example env files
+!.env.example
 
 
 # ==========================================
-# NODE MODULES
+# NODE MODULES (Node.js backend)
 # ==========================================
 
 node_modules/
 backend/node_modules/
 razorpay-payment-gateway/backend/node_modules/
+stripe-payment-gateway/backend/node_modules/
+
+
+# ==========================================
+# PYTHON VIRTUAL ENVIRONMENT (Flask frontend)
+# ==========================================
+
+venv/
+env/
+ENV/
+.venv/
+
+examples/flask-example/venv/
+examples/flask-example/env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+# ==========================================
+# FLASK SPECIFIC
+# ==========================================
+
+instance/
+.webassets-cache/
+
+# Flask session files
+*.db
+*.sqlite
+*.sqlite3
 
 
 # ==========================================
@@ -38,6 +74,7 @@ logs/
 
 .DS_Store
 Thumbs.db
+desktop.ini
 
 
 # ==========================================
@@ -57,28 +94,28 @@ Thumbs.db
 dist/
 build/
 .cache/
+out/
 
 
 # ==========================================
-# PYTHON FILES (Flask example)
+# TEST / TEMP FILES
 # ==========================================
 
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
+*.tmp
+*.temp
 
 
 # ==========================================
-# OS FILES
+# OS GENERATED FILES
 # ==========================================
 
-desktop.ini
+ehthumbs.db
+Icon?
 
 
 # ==========================================
-# OPTIONAL: KEEP ENV EXAMPLE
+# KEEP IMPORTANT FILES
 # ==========================================
 
-!.env.example
+!README.md
+!LICENSE

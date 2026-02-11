@@ -6,19 +6,21 @@
 
 <script>
 
-function pay(){
+function pay() {
 
-RazorpayGateway.startPayment({
+ RazorpayGateway.startPayment({
 
-amount:500,
+   projectId: "flask_course",
 
-backendUrl:"http://localhost:4343",
+   amount: 500,
 
-successUrl:"success.html",
+   backendUrl: "http://localhost:4343",
 
-cancelUrl:"cancel.html"
+   successUrl: "/success",
 
-});
+   cancelUrl: "/cancel"
+
+ });
 
 }
 
