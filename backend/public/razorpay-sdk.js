@@ -1,92 +1,56 @@
 (function () {
 
-  /* =====================================
-     Prevent duplicate loading
-  ===================================== */
-
-  if (window.RazorpayGateway) {
-    console.warn("RazorpayGateway already loaded");
-    return;
-  }
+  if (window.RazorpayGateway) return;
 
   console.log("Razorpay SDK Loaded");
 
-  /* =====================================
-     Main Gateway Object
-  ===================================== */
-
   window.RazorpayGateway = {
 
-    startPayment: async function (config) {
+    startPayment: async function(config) {
 
       try {
 
-        /* ================================
-           Validate config
-        ================================ */
+        const backendUrl = config.backendUrl || "http://localhost:4343";
 
-        if (!config) {
-          alert("Payment config missing");
-          return;
-        }
+        /* CREATE ORDER */
 
-        if (!config.amount) {
-          alert("Amount required");
-          return;
-        }
+        const res = await fetch(backendUrl + "/create-order", {
 
-        /* ================================
-           Detect backend URL
-        ================================ */
+          method: "POST",
 
-        const backendUrl =
-          config.backendUrl || "http://localhost:4343";
+          headers: {
+            "Content-Type": "application/json"
+          },
 
+          body: JSON.stringify({
+            amount: config.amount
+          })
 
-        /* ================================
-           Create order from backend
-        ================================ */
+        });
 
-        const response = await fetch(
-          `${backendUrl}/create-order`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              amount: config.amount
-            })
-          }
-        );
-
-        const data = await response.json();
+        const data = await res.json();
 
         if (!data.orderId) {
 
-          console.error(data);
-
           alert("Order creation failed");
 
+          console.error(data);
+
           return;
+
         }
 
+        /* CHECK RAZORPAY LOADED */
 
-        /* ================================
-           Check Razorpay loaded
-        ================================ */
-
-        if (typeof Razorpay === "undefined") {
+        if (!window.Razorpay) {
 
           alert("Razorpay SDK not loaded");
 
           return;
+
         }
 
-
-        /* ================================
-           Razorpay options
-        ================================ */
+        /* OPTIONS */
 
         const options = {
 
@@ -96,21 +60,15 @@
 
           currency: data.currency,
 
-          name: data.name || "Payment",
+          name: data.name,
 
-          description: data.description || "Payment",
+          description: data.description,
 
           order_id: data.orderId,
 
-          handler: async function (response) {
+          handler: function () {
 
-            console.log("Payment Success", response);
-
-            if (config.successUrl) {
-
-              window.location.href = config.successUrl;
-
-            }
+            window.location.href = config.successUrl;
 
           },
 
@@ -118,37 +76,22 @@
 
             ondismiss: function () {
 
-              console.log("Payment Cancelled");
-
-              if (config.cancelUrl) {
-
-                window.location.href = config.cancelUrl;
-
-              }
+              window.location.href = config.cancelUrl;
 
             }
 
-          },
-
-          theme: {
-            color: "#3399cc"
           }
 
         };
-
-
-        /* ================================
-           Open Razorpay
-        ================================ */
 
         const rzp = new Razorpay(options);
 
         rzp.open();
 
       }
-      catch (error) {
+      catch (err) {
 
-        console.error("RazorpayGateway Error:", error);
+        console.error(err);
 
         alert("Payment failed");
 

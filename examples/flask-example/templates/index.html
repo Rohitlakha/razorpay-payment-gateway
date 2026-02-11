@@ -3,22 +3,29 @@
 
 <head>
 
-<!-- 1. Razorpay official SDK -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-<!-- 2. YOUR SDK -->
 <script src="http://localhost:4343/sdk/razorpay-sdk.js"></script>
 
 </head>
 
 <body>
 
+<h2>Razorpay Payment Test</h2>
+
 <button onclick="pay()">Pay ₹500</button>
 
-<!-- 3. YOUR SCRIPT AFTER SDK -->
 <script>
 
 function pay() {
+
+  if (!window.RazorpayGateway) {
+
+    alert("SDK not loaded");
+
+    return;
+
+  }
 
   RazorpayGateway.startPayment({
 
