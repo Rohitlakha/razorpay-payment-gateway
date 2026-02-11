@@ -1,3 +1,211 @@
-<h2>Payment Successful</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-<a href="/">Back</a>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Payment Successful</title>
+
+<style>
+
+/* Background */
+
+body {
+
+  margin: 0;
+  padding: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+
+  height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+}
+
+
+/* Card */
+
+.container {
+
+  background: white;
+
+  padding: 40px;
+
+  border-radius: 12px;
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+
+  text-align: center;
+
+  width: 350px;
+
+}
+
+
+/* Icon */
+
+.icon {
+
+  font-size: 70px;
+
+  color: #2ecc71;
+
+  margin-bottom: 15px;
+
+  animation: pop 0.5s ease;
+
+}
+
+
+/* Animation */
+
+@keyframes pop {
+
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+}
+
+
+/* Title */
+
+.title {
+
+  font-size: 24px;
+
+  font-weight: bold;
+
+  color: #333;
+
+  margin-bottom: 10px;
+
+}
+
+
+/* Message */
+
+.message {
+
+  color: #666;
+
+  margin-bottom: 10px;
+
+}
+
+
+/* Redirect text */
+
+.redirect {
+
+  font-size: 13px;
+
+  color: #999;
+
+  margin-bottom: 20px;
+
+}
+
+
+/* Button */
+
+.button {
+
+  background: #3399cc;
+
+  color: white;
+
+  border: none;
+
+  padding: 12px;
+
+  font-size: 16px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  width: 100%;
+
+  transition: 0.3s;
+
+}
+
+
+.button:hover {
+
+  background: #287ca1;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="icon">
+    ✅
+  </div>
+
+  <div class="title">
+    Payment Successful
+  </div>
+
+  <div class="message">
+    Your payment was completed successfully.
+  </div>
+
+  <div class="redirect">
+    Redirecting to home page in 3 seconds...
+  </div>
+
+  <button class="button" onclick="goHome()">
+    Back to Home
+  </button>
+
+</div>
+
+
+<script>
+
+/* Manual redirect */
+
+function goHome() {
+
+  window.location.href = "/";
+
+}
+
+
+/* Auto redirect */
+
+setTimeout(function() {
+
+  window.location.href = "/";
+
+}, 3000);
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,47 +1,242 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Secure Payment | Razorpay Gateway</title>
+
+<!-- Razorpay Official SDK -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+<!-- Your Gateway SDK -->
 <script src="http://localhost:4343/sdk/razorpay-sdk.js"></script>
+
+<style>
+
+/* ===== Background ===== */
+
+body {
+
+  margin: 0;
+  padding: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  background: linear-gradient(135deg, #667eea, #764ba2);
+
+  height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+}
+
+
+/* ===== Card Container ===== */
+
+.payment-card {
+
+  background: white;
+
+  padding: 40px;
+
+  border-radius: 12px;
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+
+  width: 350px;
+
+  text-align: center;
+
+}
+
+
+/* ===== Title ===== */
+
+.title {
+
+  font-size: 24px;
+
+  font-weight: bold;
+
+  color: #333;
+
+  margin-bottom: 10px;
+
+}
+
+
+/* ===== Description ===== */
+
+.description {
+
+  color: #777;
+
+  margin-bottom: 20px;
+
+}
+
+
+/* ===== Amount ===== */
+
+.amount {
+
+  font-size: 32px;
+
+  font-weight: bold;
+
+  color: #2ecc71;
+
+  margin-bottom: 25px;
+
+}
+
+
+/* ===== Button ===== */
+
+.pay-btn {
+
+  background: #3399cc;
+
+  color: white;
+
+  border: none;
+
+  padding: 14px;
+
+  font-size: 16px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  width: 100%;
+
+  transition: 0.3s;
+
+}
+
+
+.pay-btn:hover {
+
+  background: #287ca1;
+
+}
+
+
+.pay-btn:disabled {
+
+  background: gray;
+
+  cursor: not-allowed;
+
+}
+
+
+/* ===== Status Text ===== */
+
+.status {
+
+  margin-top: 15px;
+
+  font-size: 14px;
+
+  color: #555;
+
+}
+
+</style>
 
 </head>
 
+
 <body>
 
-<h2>Razorpay Payment Test</h2>
 
-<button onclick="pay()">Pay ₹500</button>
+<div class="payment-card">
+
+  <div class="title">
+    Secure Payment
+  </div>
+
+  <div class="description">
+    Razorpay Payment Gateway Integration
+  </div>
+
+  <div class="amount">
+    ₹500
+  </div>
+
+  <button id="payBtn" class="pay-btn">
+    Pay Securely
+  </button>
+
+  <div id="status" class="status"></div>
+
+</div>
+
 
 <script>
 
-function pay() {
+const button = document.getElementById("payBtn");
 
-  if (!window.RazorpayGateway) {
+const status = document.getElementById("status");
 
-    alert("SDK not loaded");
 
-    return;
+button.addEventListener("click", pay);
+
+
+async function pay() {
+
+  try {
+
+    if (!window.RazorpayGateway) {
+
+      status.innerText = "Payment system not loaded. Refresh page.";
+
+      return;
+
+    }
+
+    button.disabled = true;
+
+    status.innerText = "Connecting to secure gateway...";
+
+
+    await RazorpayGateway.startPayment({
+
+      amount: 500,
+
+      backendUrl: "http://localhost:4343",
+
+      successUrl: "http://localhost:5000/success",
+
+      cancelUrl: "http://localhost:5000/cancel"
+
+    });
 
   }
+  catch (error) {
 
-  RazorpayGateway.startPayment({
+    console.error(error);
 
-    amount: 500,
+    status.innerText = "Payment failed. Try again.";
 
-    backendUrl: "http://localhost:4343",
+    button.disabled = false;
 
-    successUrl: "http://localhost:5000/success",
-
-    cancelUrl: "http://localhost:5000/cancel"
-
-  });
+  }
 
 }
 
 </script>
 
+
 </body>
+
 </html>
