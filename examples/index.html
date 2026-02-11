@@ -1,0 +1,25 @@
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script src="http://localhost:4343/sdk/razorpay-sdk.js"></script>
+
+<button onclick="pay()">Pay ₹500</button>
+
+<script>
+
+function pay(){
+
+RazorpayGateway.startPayment({
+
+amount:500,
+
+backendUrl:"http://localhost:4343",
+
+successUrl:"success.html",
+
+cancelUrl:"cancel.html"
+
+});
+
+}
+
+</script>
