@@ -7,9 +7,7 @@ const limiter = rateLimit({
   max: 100,
 
   message: {
-
-    error: "Too many requests, try again later"
-
+    error: "Too many requests. Try again later."
   }
 
 });

@@ -1,57 +1,48 @@
 const express = require("express");
-const router = express.Router();
 const Razorpay = require("razorpay");
 
-const projects = require("../config/projects");
+const router = express.Router();
 
 const razorpay = new Razorpay({
+
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
+
 });
 
 router.post("/", async (req, res) => {
 
   try {
 
-    const { projectId, amount } = req.body;
+    const { amount } = req.body;
 
-    if (!projectId || !amount) {
+    if (!amount) {
 
       return res.status(400).json({
-        error: "Missing projectId or amount"
+        error: "Amount required"
       });
 
     }
 
-    const project = projects[projectId];
-
-    if (!project) {
-
-      return res.status(400).json({
-        error: "Invalid project"
-      });
-
-    }
-
-    if (!project.allowedAmounts.includes(amount)) {
-
-      return res.status(400).json({
-        error: "Invalid amount"
-      });
-
-    }
-
-    const order = await razorpay.orders.create({
+    const options = {
 
       amount: amount * 100,
-      currency: project.currency,
+      currency: "INR",
       receipt: "receipt_" + Date.now()
 
-    });
+    };
+
+    const order = await razorpay.orders.create(options);
 
     res.json({
+
       orderId: order.id,
-      key: process.env.RAZORPAY_KEY_ID
+      amount: order.amount,
+      currency: order.currency,
+      key: process.env.RAZORPAY_KEY_ID,
+      name: "Student Payment",
+      description: "Course Fee"
+
     });
 
   }

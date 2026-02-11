@@ -1,27 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<!-- 1. Razorpay official SDK -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+<!-- 2. YOUR SDK -->
 <script src="http://localhost:4343/sdk/razorpay-sdk.js"></script>
+
+</head>
+
+<body>
 
 <button onclick="pay()">Pay ₹500</button>
 
+<!-- 3. YOUR SCRIPT AFTER SDK -->
 <script>
 
 function pay() {
 
- RazorpayGateway.startPayment({
+  RazorpayGateway.startPayment({
 
-   projectId: "flask_course",
+    amount: 500,
 
-   amount: 500,
+    backendUrl: "http://localhost:4343",
 
-   backendUrl: "http://localhost:4343",
+    successUrl: "http://localhost:5000/success",
 
-   successUrl: "/success",
+    cancelUrl: "http://localhost:5000/cancel"
 
-   cancelUrl: "/cancel"
-
- });
+  });
 
 }
 
 </script>
+
+</body>
+</html>

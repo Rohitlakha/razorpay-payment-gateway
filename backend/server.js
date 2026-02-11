@@ -9,44 +9,78 @@ const limiter = require("./middleware/rateLimiter");
 
 const app = express();
 
-/* Security middleware */
+/* ====================================
+   SECURITY MIDDLEWARE
+==================================== */
 
-app.use(helmet());
+// Fix SDK blocking issue
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false
+  })
+);
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"]
+  })
+);
 
 app.use(express.json());
 
 app.use(limiter);
 
-/* Serve SDK */
+/* ====================================
+   SERVE SDK FILE
+==================================== */
 
-app.use("/sdk", express.static(path.join(__dirname, "public")));
+app.use(
+  "/sdk",
+  express.static(path.join(__dirname, "public"), {
+    setHeaders: (res) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+  })
+);
 
-/* Routes */
+/* ====================================
+   ROUTES
+==================================== */
 
 const createOrder = require("./routes/create-order");
-
 const verifyPayment = require("./routes/verify-payment");
 
 app.use("/create-order", createOrder);
-
 app.use("/verify-payment", verifyPayment);
 
-/* Health check */
+/* ====================================
+   HEALTH CHECK
+==================================== */
 
 app.get("/", (req, res) => {
 
   res.json({
-
-    status: "Secure Razorpay Gateway Running"
-
+    status: "Razorpay Gateway Running",
+    sdk: `http://localhost:${process.env.PORT}/sdk/razorpay-sdk.js`
   });
 
 });
 
-app.listen(process.env.PORT || 4343, () => {
+/* ====================================
+   START SERVER
+==================================== */
 
-  console.log("Secure Razorpay Gateway Running on port 4343");
+const PORT = process.env.PORT || 4343;
+
+app.listen(PORT, () => {
+
+  console.log("===================================");
+  console.log("Razorpay Gateway Running");
+  console.log(`Server: http://localhost:${PORT}`);
+  console.log(`SDK: http://localhost:${PORT}/sdk/razorpay-sdk.js`);
+  console.log("===================================");
 
 });

@@ -1,91 +1,158 @@
 (function () {
 
-  if (window.RazorpayGateway) return;
+  /* =====================================
+     Prevent duplicate loading
+  ===================================== */
+
+  if (window.RazorpayGateway) {
+    console.warn("RazorpayGateway already loaded");
+    return;
+  }
+
+  console.log("Razorpay SDK Loaded");
+
+  /* =====================================
+     Main Gateway Object
+  ===================================== */
 
   window.RazorpayGateway = {
 
-    startPayment: async function(config) {
+    startPayment: async function (config) {
 
-      const backendUrl = config.backendUrl || "http://localhost:4343";
+      try {
 
-      const orderResponse = await fetch(`${backendUrl}/create-order`, {
+        /* ================================
+           Validate config
+        ================================ */
 
-        method: "POST",
-
-        headers: {
-
-          "Content-Type": "application/json"
-
-        },
-
-        body: JSON.stringify({
-
-          projectId: config.projectId,
-
-          amount: config.amount
-
-        })
-
-      });
-
-      const order = await orderResponse.json();
-
-      const options = {
-
-        key: order.key,
-
-        amount: config.amount * 100,
-
-        currency: "INR",
-
-        order_id: order.orderId,
-
-        handler: async function (response) {
-
-          const verifyResponse = await fetch(`${backendUrl}/verify-payment`, {
-
-            method: "POST",
-
-            headers: {
-
-              "Content-Type": "application/json"
-
-            },
-
-            body: JSON.stringify(response)
-
-          });
-
-          const verifyData = await verifyResponse.json();
-
-          if (verifyData.success) {
-
-            window.location.href = config.successUrl;
-
-          }
-          else {
-
-            window.location.href = config.cancelUrl;
-
-          }
-
-        },
-
-        modal: {
-
-          ondismiss: function () {
-
-            window.location.href = config.cancelUrl;
-
-          }
-
+        if (!config) {
+          alert("Payment config missing");
+          return;
         }
 
-      };
+        if (!config.amount) {
+          alert("Amount required");
+          return;
+        }
 
-      const rzp = new Razorpay(options);
+        /* ================================
+           Detect backend URL
+        ================================ */
 
-      rzp.open();
+        const backendUrl =
+          config.backendUrl || "http://localhost:4343";
+
+
+        /* ================================
+           Create order from backend
+        ================================ */
+
+        const response = await fetch(
+          `${backendUrl}/create-order`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              amount: config.amount
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!data.orderId) {
+
+          console.error(data);
+
+          alert("Order creation failed");
+
+          return;
+        }
+
+
+        /* ================================
+           Check Razorpay loaded
+        ================================ */
+
+        if (typeof Razorpay === "undefined") {
+
+          alert("Razorpay SDK not loaded");
+
+          return;
+        }
+
+
+        /* ================================
+           Razorpay options
+        ================================ */
+
+        const options = {
+
+          key: data.key,
+
+          amount: data.amount,
+
+          currency: data.currency,
+
+          name: data.name || "Payment",
+
+          description: data.description || "Payment",
+
+          order_id: data.orderId,
+
+          handler: async function (response) {
+
+            console.log("Payment Success", response);
+
+            if (config.successUrl) {
+
+              window.location.href = config.successUrl;
+
+            }
+
+          },
+
+          modal: {
+
+            ondismiss: function () {
+
+              console.log("Payment Cancelled");
+
+              if (config.cancelUrl) {
+
+                window.location.href = config.cancelUrl;
+
+              }
+
+            }
+
+          },
+
+          theme: {
+            color: "#3399cc"
+          }
+
+        };
+
+
+        /* ================================
+           Open Razorpay
+        ================================ */
+
+        const rzp = new Razorpay(options);
+
+        rzp.open();
+
+      }
+      catch (error) {
+
+        console.error("RazorpayGateway Error:", error);
+
+        alert("Payment failed");
+
+      }
 
     }
 
