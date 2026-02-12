@@ -10,24 +10,23 @@
 
       try {
 
-        /* Validate required fields */
-
         if (!config.amount)
-          throw new Error("Amount is required");
+          throw new Error("Amount required");
 
         if (!config.projectId)
-          throw new Error("ProjectId is required");
+          throw new Error("ProjectId required");
 
-
-        /* Detect backend URL automatically */
 
         const backendUrl =
           config.backendUrl ||
-          window.RAZORPAY_GATEWAY_URL ||
-          "http://localhost:5000";
+          window.location.origin;
 
 
-        /* Create order */
+        /*
+        ==========================
+        CREATE ORDER
+        ==========================
+        */
 
         const res = await fetch(
           backendUrl + "/create-order",
@@ -42,12 +41,11 @@
 
               projectId: config.projectId,
 
-              name: config.name || "Customer",
+              name: config.name,
 
-              email: config.email || "customer@email.com",
+              email: config.email,
 
-              description:
-                config.description || "Payment"
+              description: config.description
 
             })
           }
@@ -56,12 +54,15 @@
 
         const data = await res.json();
 
+        if (!data.success)
+          throw new Error(data.error || "Order failed");
 
-        if (!data.orderId)
-          throw new Error("Order creation failed");
 
-
-        /* Razorpay options */
+        /*
+        ==========================
+        RAZORPAY OPTIONS
+        ==========================
+        */
 
         const options = {
 
@@ -78,84 +79,64 @@
           order_id: data.orderId,
 
 
-          /* SUCCESS HANDLER */
+          /*
+          ==========================
+          SUCCESS HANDLER
+          ==========================
+          */
 
           handler: async function (response) {
 
             try {
 
-              /* Verify payment with backend */
+              await fetch(
+                backendUrl + "/verify-payment",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type":
+                    "application/json"
+                  },
+                  body: JSON.stringify({
 
-              const verifyRes =
-                await fetch(
-                  backendUrl +
-                  "/verify-payment",
-                  {
-                    method: "POST",
+                    razorpay_order_id:
+                    response.razorpay_order_id,
 
-                    headers: {
-                      "Content-Type":
-                        "application/json"
-                    },
+                    razorpay_payment_id:
+                    response.razorpay_payment_id,
 
-                    body: JSON.stringify({
+                    razorpay_signature:
+                    response.razorpay_signature,
 
-                      razorpay_order_id:
-                        response.razorpay_order_id,
+                    projectId:
+                    config.projectId,
 
-                      razorpay_payment_id:
-                        response.razorpay_payment_id,
+                    amount:
+                    config.amount,
 
-                      razorpay_signature:
-                        response.razorpay_signature,
+                    name:
+                    config.name,
 
-                      projectId:
-                        config.projectId,
+                    email:
+                    config.email,
 
-                      amount:
-                        config.amount,
+                    description:
+                    config.description
 
-                      name:
-                        config.name,
-
-                      email:
-                        config.email,
-
-                      description:
-                        config.description
-
-                    })
-
-                  }
-                );
-
-
-              const verifyData =
-                await verifyRes.json();
-
-
-              if (!verifyData.success)
-                throw new Error(
-                  "Verification failed"
-                );
-
-
-              console.log(
-                "Payment verified and logged"
+                  })
+                }
               );
 
 
-              /* Redirect */
+              console.log("Payment verified");
+
 
               if (config.successUrl) {
 
-                const params =
-                  "?payment_id=" +
-                  response.razorpay_payment_id;
-
                 window.location.href =
                   config.successUrl +
-                  params;
+                  "?payment_id=" +
+                  response.razorpay_payment_id;
 
               }
 
@@ -164,24 +145,32 @@
 
               console.error(err);
 
-              alert(
-                "Payment verification failed"
-              );
+              alert("Verification failed");
 
             }
 
           },
 
 
-          /* CANCEL HANDLER */
+          /*
+          ==========================
+          CANCEL HANDLER
+          ==========================
+          */
 
           modal: {
 
             ondismiss: function () {
 
-              if (config.cancelUrl)
+              console.log("Payment cancelled");
+
+              if (config.cancelUrl) {
+
                 window.location.href =
-                  config.cancelUrl;
+                  config.cancelUrl +
+                  "?reason=cancelled";
+
+              }
 
             }
 
@@ -190,9 +179,40 @@
         };
 
 
-        /* Open Razorpay popup */
+        const rzp =
+          new Razorpay(options);
 
-        new Razorpay(options).open();
+
+        /*
+        ==========================
+        PAYMENT FAILED HANDLER
+        ==========================
+        */
+
+        rzp.on("payment.failed",
+        function () {
+
+          console.log("Payment failed");
+
+          if (config.cancelUrl) {
+
+            window.location.href =
+              config.cancelUrl +
+              "?reason=failed";
+
+          }
+
+        });
+
+
+        /*
+        ==========================
+        OPEN PAYMENT WINDOW
+        ==========================
+        */
+
+        rzp.open();
+
 
       }
       catch (err) {
