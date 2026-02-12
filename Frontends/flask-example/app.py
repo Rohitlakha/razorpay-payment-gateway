@@ -1,8 +1,6 @@
-from flask import Flask, render_template, redirect, session, url_for
+from flask import Flask, render_template
 
 app = Flask(__name__)
-
-app.secret_key = "secure_secret_key"
 
 
 @app.route("/")

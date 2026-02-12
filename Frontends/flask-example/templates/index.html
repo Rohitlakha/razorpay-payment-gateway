@@ -154,25 +154,26 @@ async function pay() {
 
     await RazorpayGateway.startPayment({
 
-      /* Dynamic Payment Amount */
+      /* REQUIRED */
       amount: 500,
 
-      /* Project ID (important for multi-project support) */
       projectId: "college_fee",
 
-      /* Customer info */
       name: "Rohit Lakha",
+
       email: "rohit@email.com",
 
-      /* Description */
       description: "College Fee Payment",
 
-      /* Correct backend URL */
+
+      /* Gateway backend */
       backendUrl: "http://localhost:5000",
 
-      /* Redirect URLs */
-      successUrl: "http://localhost:5000/success",
-      cancelUrl: "http://localhost:5000/cancel"
+
+      /* IMPORTANT: Flask frontend URLs */
+      successUrl: "http://127.0.0.1:5500/success",
+
+      cancelUrl: "http://127.0.0.1:5500/cancel"
 
     });
 

@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const helmet = require("helmet");
+const path = require("path");
 
 require("dotenv").config();
 
@@ -9,52 +9,115 @@ const limiter = require("./middleware/rateLimiter");
 
 const app = express();
 
-/* SECURITY */
+/* Hide Express fingerprint */
+app.disable("x-powered-by");
 
+
+/* Security headers */
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: {
+      policy: "cross-origin"
+    },
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: false
+    contentSecurityPolicy: false
   })
 );
 
-app.use(cors());
-app.use(express.json());
+
+/* Allowed origins */
+const allowedOrigins = [
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:5000",
+  "http://127.0.0.1:5000",
+  "https://yourdomain.com"
+];
+
+
+/* CORS configuration */
+app.use(
+  cors({
+    origin: function (origin, callback) {
+
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+
+        return callback(null, true);
+
+      }
+
+      console.warn("Blocked by CORS:", origin);
+
+      return callback(null, false);
+
+    },
+
+    methods: ["GET", "POST", "OPTIONS"],
+
+    allowedHeaders: ["Content-Type", "Authorization"],
+
+    credentials: true
+
+  })
+);
+
+
+/* Rate limiter */
 app.use(limiter);
 
-/* SERVE SDK */
 
-app.use("/sdk", express.static(path.join(__dirname, "public")));
+/* JSON parser */
+app.use(express.json());
 
-/* ROUTES */
 
-const createOrder = require("./routes/create-order");
-const verifyPayment = require("./routes/verify-payment");
+/* Serve SDK */
+app.use(
+  "/sdk",
+  express.static(path.join(__dirname, "public"))
+);
 
-app.use("/create-order", createOrder);
-app.use("/verify-payment", verifyPayment);
 
-/* HEALTH CHECK */
+/* Routes */
+app.use("/create-order",
+  require("./routes/create-order"));
 
+app.use("/verify-payment",
+  require("./routes/verify-payment"));
+
+
+/* Health check */
 app.get("/", (req, res) => {
 
   res.json({
     status: "Gateway Running",
-    sdk: process.env.BASE_URL + "/sdk/razorpay-sdk.js"
+    time: new Date()
   });
 
 });
 
-/* START SERVER */
 
+/* Global error handler */
+app.use((err, req, res, next) => {
+
+  console.error("Server Error:", err);
+
+  res.status(500).json({
+    error: "Internal server error"
+  });
+
+});
+
+
+/* Start server */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
 
-  console.log("===================================");
-  console.log("Gateway Running");
-  console.log("http://localhost:" + PORT);
-  console.log("===================================");
+  console.log("=================================");
+  console.log("Gateway running on port:", PORT);
+  console.log("SDK URL:", `http://localhost:${PORT}/sdk/razorpay-sdk.js`);
+  console.log("=================================");
 
 });

@@ -3,77 +3,92 @@ const Razorpay = require("razorpay");
 
 const router = express.Router();
 
-const projects = require("../config/projects");
+const allowedProjects = require("../config/projects");
 
 const razorpay = new Razorpay({
 
   key_id: process.env.RAZORPAY_KEY_ID,
+
   key_secret: process.env.RAZORPAY_KEY_SECRET
 
 });
+
 
 router.post("/", async (req, res) => {
 
   try {
 
     const {
-
       amount,
       projectId,
       name,
       email,
       description
-
     } = req.body;
 
-    if (!amount) {
+
+    /* Validate amount */
+
+    if (!amount || amount < 1 || amount > 1000000) {
 
       return res.status(400).json({
-        error: "Amount required"
+        error: "Invalid amount"
       });
 
     }
 
-    let projectName = "Student Payment";
-    let currency = "INR";
 
-    if (projectId && projects[projectId]) {
+    /* Validate project */
 
-      projectName = projects[projectId].name;
-      currency = projects[projectId].currency;
+    if (!allowedProjects[projectId]) {
+
+      return res.status(403).json({
+        error: "Unauthorized project"
+      });
 
     }
+
+
+    /* Create order */
 
     const order = await razorpay.orders.create({
 
       amount: amount * 100,
-      currency: currency,
-      receipt: "receipt_" + Date.now(),
+
+      currency: "INR",
+
+      receipt: "rcpt_" + Date.now(),
 
       notes: {
-        projectId: projectId || "",
-        name: name || "",
-        email: email || "",
-        description: description || ""
+        projectId,
+        name,
+        email,
+        description
       }
 
     });
 
+
     res.json({
 
       orderId: order.id,
+
       amount: order.amount,
+
       currency: order.currency,
+
       key: process.env.RAZORPAY_KEY_ID,
-      name: projectName,
-      description: description || projectName
+
+      name: projectId,
+
+      description: description || "Secure Payment"
 
     });
 
   }
-  catch (error) {
+  catch (err) {
 
-    console.error(error);
+    console.error(err);
 
     res.status(500).json({
       error: "Order creation failed"
@@ -82,5 +97,6 @@ router.post("/", async (req, res) => {
   }
 
 });
+
 
 module.exports = router;
