@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ecommerce Store</title>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="http://localhost:5000/sdk/razorpay-sdk.js"></script>
+
+<style>
+
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
+}
+
+.title {
+  color: white;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.price {
+  color: green;
+  font-size: 22px;
+  margin: 10px 0;
+}
+
+button {
+  background: #3399cc;
+  color: white;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #287ca1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 class="title">Ecommerce Store</h1>
+
+<div class="grid">
+
+{% for product in products %}
+
+<div class="card">
+
+<h3>{{product.name}}</h3>
+
+<div class="price">₹{{product.price}}</div>
+
+<button onclick="pay('{{product.name}}',{{product.price}})">
+Buy Now
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+<script>
+
+function pay(name, price) {
+
+RazorpayGateway.startPayment({
+
+amount: price,
+
+projectId: "ecommerce_store",
+
+name: "Customer",
+
+email: "customer@email.com",
+
+description: name,
+
+backendUrl: "http://localhost:5000",
+
+successUrl: window.location.href,
+
+cancelUrl: window.location.href
+
+});
+
+}
+
+</script>
+
+</body>
+</html>

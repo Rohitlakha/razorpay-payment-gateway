@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Hotel Booking</title>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="http://localhost:5000/sdk/razorpay-sdk.js"></script>
+
+<style>
+
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg,#ee0979,#ff6a00);
+  margin: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 30px;
+}
+
+.room {
+  background: white;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  background: #3399cc;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+button:hover {
+  background: #287ca1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2 style="color:white;text-align:center;">
+Hotel Booking
+</h2>
+
+{% for room in rooms %}
+
+<div class="room">
+
+<div>
+
+<b>{{room.type}}</b>
+
+<br>
+
+₹{{room.price}}
+
+</div>
+
+<button onclick="pay('{{room.type}}',{{room.price}})">
+Book Now
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<script>
+
+function pay(type, price) {
+
+RazorpayGateway.startPayment({
+
+amount: price,
+
+projectId: "hotel_management",
+
+name: "Guest",
+
+email: "guest@email.com",
+
+description: type,
+
+backendUrl: "http://localhost:5000",
+
+successUrl: window.location.href,
+
+cancelUrl: window.location.href
+
+});
+
+}
+
+</script>
+
+</body>
+</html>

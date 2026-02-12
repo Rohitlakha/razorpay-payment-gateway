@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>College Fees</title>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="http://localhost:5000/sdk/razorpay-sdk.js"></script>
+
+<style>
+
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg,#11998e,#38ef7d);
+  margin: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 30px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  background: #3399cc;
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+}
+
+button:hover {
+  background: #287ca1;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2 style="color:white;text-align:center;">
+College Fee Payment
+</h2>
+
+{% for fee in fees %}
+
+<div class="card">
+
+<div>
+
+<b>{{fee.type}}</b>
+
+<br>
+
+₹{{fee.amount}}
+
+</div>
+
+<button onclick="pay('{{fee.type}}',{{fee.amount}})">
+Pay
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<script>
+
+function pay(type, amount) {
+
+RazorpayGateway.startPayment({
+
+amount: amount,
+
+projectId: "college_fee",
+
+name: "Student",
+
+email: "student@email.com",
+
+description: type,
+
+backendUrl: "http://localhost:5000",
+
+successUrl: window.location.href,
+
+cancelUrl: window.location.href
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
