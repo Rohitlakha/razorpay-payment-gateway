@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Grocery Store</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script src="https://razorpay-backend-l3dt.onrender.com/sdk/razorpay-sdk.js"></script>
+
+    <style>
+      body {
+        font-family: Arial;
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+
+      .title {
+        color: white;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .price {
+        color: green;
+        font-size: 20px;
+        margin: 10px;
+      }
+
+      button {
+        background: #3399cc;
+        color: white;
+        border: none;
+        padding: 10px;
+        width: 100%;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      button:hover {
+        background: #287ca1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1 class="title">Grocery Store</h1>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Rice</h3>
+          <div class="price">₹500</div>
+          <button onclick="pay('Rice', 500)">Buy</button>
+        </div>
+
+        <div class="card">
+          <h3>Milk</h3>
+          <div class="price">₹60</div>
+          <button onclick="pay('Milk', 60)">Buy</button>
+        </div>
+
+        <div class="card">
+          <h3>Oil</h3>
+          <div class="price">₹320</div>
+          <button onclick="pay('Oil', 320)">Buy</button>
+        </div>
+
+        <div class="card">
+          <h3>Sugar</h3>
+          <div class="price">₹120</div>
+          <button onclick="pay('Sugar', 120)">Buy</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function pay(product, amount) {
+        await RazorpayGateway.startPayment({
+          amount: amount,
+
+          projectId: "grocery_project",
+
+          name: "Customer",
+
+          email: "customer@email.com",
+
+          description: product,
+
+          backendUrl: "https://razorpay-backend-l3dt.onrender.com",
+
+          successUrl: "/success",
+
+          cancelUrl: "/cancel",
+        });
+      }
+    </script>
+  </body>
+</html>
