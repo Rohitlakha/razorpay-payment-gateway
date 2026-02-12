@@ -1,11 +1,28 @@
 const express = require("express");
-const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
+const verifySignature =
+require("../utils/verifySignature");
+
 const router = express.Router();
 
-const logFile = path.join(__dirname, "../logs/payments.log");
+
+/* Ensure logs directory exists */
+
+const logDir =
+path.join(__dirname, "../logs");
+
+if (!fs.existsSync(logDir)) {
+
+  fs.mkdirSync(logDir, {
+    recursive: true
+  });
+
+}
+
+const logFile =
+path.join(logDir, "payments.log");
 
 
 router.post("/", (req, res) => {
@@ -13,65 +30,143 @@ router.post("/", (req, res) => {
   try {
 
     const {
+
       razorpay_order_id,
       razorpay_payment_id,
-      razorpay_signature
+      razorpay_signature,
+
+      projectId,
+      amount,
+      name,
+      email,
+      description
+
     } = req.body;
 
 
-    const body =
-      razorpay_order_id + "|" + razorpay_payment_id;
+    /* Validate required fields */
+
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        error: "Missing payment data"
+
+      });
+
+    }
 
 
-    const expected = crypto
-      .createHmac(
-        "sha256",
-        process.env.RAZORPAY_KEY_SECRET
-      )
-      .update(body)
-      .digest("hex");
+    /* Verify signature using utility */
+
+    const isValid =
+      verifySignature({
+
+        orderId:
+          razorpay_order_id,
+
+        paymentId:
+          razorpay_payment_id,
+
+        signature:
+          razorpay_signature
+
+      });
 
 
-    if (expected === razorpay_signature) {
+    if (!isValid) {
 
-      /* Log payment */
-
-      const log = {
-
-        order_id: razorpay_order_id,
-
-        payment_id: razorpay_payment_id,
-
-        time: new Date().toISOString()
-
-      };
-
-      fs.appendFileSync(
-        logFile,
-        JSON.stringify(log) + "\n"
+      console.warn(
+        "Invalid signature attempt"
       );
 
+      return res.status(400).json({
 
-      res.json({
-        success: true
+        success: false,
+
+        error: "Invalid signature"
+
       });
 
     }
-    else {
 
-      res.status(400).json({
-        success: false
-      });
 
-    }
+    /* Prepare log entry */
+
+    const logEntry = {
+
+      time:
+        new Date().toISOString(),
+
+      order_id:
+        razorpay_order_id,
+
+      payment_id:
+        razorpay_payment_id,
+
+      project:
+        projectId || "unknown",
+
+      amount:
+        amount || 0,
+
+      customer:
+        name || "unknown",
+
+      email:
+        email || "unknown",
+
+      description:
+        description || "payment"
+
+    };
+
+
+    /* Write log */
+
+    fs.appendFileSync(
+
+      logFile,
+
+      JSON.stringify(logEntry) + "\n"
+
+    );
+
+
+    console.log(
+      "Payment verified and logged:"
+    );
+
+    console.log(logEntry);
+
+
+    res.json({
+
+      success: true
+
+    });
 
   }
   catch (err) {
 
-    console.error(err);
+    console.error(
+      "Verification error:",
+      err
+    );
 
     res.status(500).json({
-      error: "Verification failed"
+
+      success: false,
+
+      error:
+        "Verification failed"
+
     });
 
   }
