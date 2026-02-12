@@ -4,18 +4,14 @@ const Razorpay = require("razorpay");
 const router = express.Router();
 
 const allowedProjects =
-  require("../config/projects");
+require("../config/projects");
 
-
-/* Initialize Razorpay instance */
 
 const razorpay = new Razorpay({
 
-  key_id:
-    process.env.RAZORPAY_KEY_ID,
+  key_id: process.env.RAZORPAY_KEY_ID,
 
-  key_secret:
-    process.env.RAZORPAY_KEY_SECRET
+  key_secret: process.env.RAZORPAY_KEY_SECRET
 
 });
 
@@ -35,55 +31,47 @@ router.post("/", async (req, res) => {
     } = req.body;
 
 
-    /* Validate project */
-
-    if (
-      !projectId ||
-      !allowedProjects[projectId]
-    ) {
-
-      console.warn(
-        "Unauthorized project attempt:",
-        projectId
-      );
-
-      return res.status(403).json({
-
-        success: false,
-
-        error:
-          "Unauthorized project"
-
-      });
-
-    }
-
-
     /* Validate amount */
 
-    const parsedAmount =
-      Number(amount);
+    const parsedAmount = Number(amount);
 
     if (
-      !parsedAmount ||
+
       isNaN(parsedAmount) ||
       parsedAmount < 1 ||
       parsedAmount > 1000000
+
     ) {
 
       return res.status(400).json({
 
         success: false,
-
-        error:
-          "Invalid amount"
+        error: "Invalid amount"
 
       });
 
     }
 
 
-    /* Create order */
+    /* Get project automatically */
+
+    const project =
+      allowedProjects[projectId];
+
+
+    /* LOG request (IMPORTANT) */
+
+    console.log("=================================");
+    console.log("New Payment Request");
+    console.log("Project:", projectId);
+    console.log("Amount:", parsedAmount);
+    console.log("Name:", name);
+    console.log("Email:", email);
+    console.log("IP:", req.ip);
+    console.log("=================================");
+
+
+    /* Create Razorpay order */
 
     const order =
       await razorpay.orders.create({
@@ -102,80 +90,45 @@ router.post("/", async (req, res) => {
         notes: {
 
           projectId,
-
-          customerName:
-            name ||
-            "Customer",
-
-          customerEmail:
-            email ||
-            "customer@email.com",
-
-          description:
-            description ||
-            "Payment"
+          customerName: name,
+          customerEmail: email,
+          description
 
         }
 
       });
 
 
-    console.log(
-      "Order created:",
-      order.id,
-      "Project:",
-      projectId,
-      "Amount:",
-      parsedAmount
-    );
-
-
-    /* Send response */
-
     res.json({
 
       success: true,
 
-      orderId:
-        order.id,
+      orderId: order.id,
 
-      amount:
-        order.amount,
+      amount: order.amount,
 
-      currency:
-        order.currency,
+      currency: order.currency,
 
-      key:
-        process.env
-          .RAZORPAY_KEY_ID,
+      key: process.env.RAZORPAY_KEY_ID,
 
-      name:
-        allowedProjects[
-          projectId
-        ].name,
+      name: project.name,
 
-      description:
-        description ||
-        allowedProjects[
-          projectId
-        ].name
+      description: description
 
     });
 
   }
-  catch (error) {
+  catch (err) {
 
     console.error(
       "Create order error:",
-      error.message
+      err
     );
 
     res.status(500).json({
 
       success: false,
-
-      error:
-        "Order creation failed"
+      error: "Order creation failed"
 
     });
 

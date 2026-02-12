@@ -1,59 +1,24 @@
 /*
 ========================================
-Allowed student projects configuration
+Automatic project support for ALL students
+No manual project registration required
 ========================================
 */
 
-module.exports = {
+module.exports = new Proxy({}, {
 
-  college_fee: {
+  get: function(target, projectId) {
 
-    name: "College Fee System",
+    return {
 
-    description: "Student fee payments",
+      name: projectId,
 
-    active: true
+      description: "Student Project Payment",
 
-  },
+      active: true
 
-  hotel_management: {
-
-    name: "Hotel Management System",
-
-    description: "Room booking payments",
-
-    active: true
-
-  },
-
-  ecommerce_store: {
-
-    name: "Ecommerce Store",
-
-    description: "Product purchase payments",
-
-    active: true
-
-  },
-
-  flask_course: {
-
-    name: "Flask Course Project",
-
-    description: "Course fee payments",
-
-    active: true
-
-  },
-
-  custom_payment: {
-
-    name: "Custom Payment System",
-
-    description: "Dynamic user input payments",
-
-    active: true
+    };
 
   }
 
-};
+});

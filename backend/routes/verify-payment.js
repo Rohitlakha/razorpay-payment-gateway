@@ -6,11 +6,10 @@ const verifySignature = require("../utils/verifySignature");
 
 const router = express.Router();
 
-
 /*
 ========================================
 Ensure logs directory exists
-(Render filesystem safe)
+(Render safe)
 ========================================
 */
 
@@ -23,6 +22,8 @@ try {
     fs.mkdirSync(logDir, {
       recursive: true
     });
+
+    console.log("Logs directory created");
 
   }
 
@@ -67,10 +68,14 @@ router.post("/", (req, res) => {
     */
 
     if (
+
       !razorpay_order_id ||
       !razorpay_payment_id ||
       !razorpay_signature
+
     ) {
+
+      console.warn("Missing payment fields");
 
       return res.status(400).json({
 
@@ -102,7 +107,7 @@ router.post("/", (req, res) => {
     if (!isValid) {
 
       console.warn(
-        "Invalid payment signature:",
+        "Invalid signature:",
         razorpay_order_id
       );
 
@@ -118,7 +123,7 @@ router.post("/", (req, res) => {
 
     /*
     ========================================
-    Prepare payment log entry
+    Prepare log entry
     ========================================
     */
 
@@ -140,49 +145,49 @@ router.post("/", (req, res) => {
 
       description: description || "payment",
 
-      ip: req.ip
+      ip: req.headers["x-forwarded-for"] || req.ip
 
     };
 
 
     /*
     ========================================
-    Write log safely
+    Write to file
     ========================================
     */
 
     try {
 
       fs.appendFileSync(
+
         logFile,
+
         JSON.stringify(logEntry) + "\n"
+
       );
 
-    } catch (logError) {
+    } catch (err) {
 
-      console.error(
-        "Log write failed:",
-        logError
-      );
+      console.error("Log write error:", err);
 
     }
 
 
     /*
     ========================================
-    Console log (Render logs visible)
+    Console log (VISIBLE ON RENDER)
     ========================================
     */
 
-    console.log(
-      "Payment verified:",
-      logEntry.order_id
-    );
+    console.log("=================================");
+    console.log("Payment Verified Successfully");
+    console.log(logEntry);
+    console.log("=================================");
 
 
     /*
     ========================================
-    Success response
+    Response
     ========================================
     */
 
@@ -199,10 +204,7 @@ router.post("/", (req, res) => {
   }
   catch (err) {
 
-    console.error(
-      "Verification error:",
-      err
-    );
+    console.error("Verification error:", err);
 
     res.status(500).json({
 
