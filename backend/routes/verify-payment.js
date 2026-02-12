@@ -2,28 +2,44 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 
-const verifySignature =
-require("../utils/verifySignature");
+const verifySignature = require("../utils/verifySignature");
 
 const router = express.Router();
 
 
-/* Ensure logs directory exists */
+/*
+========================================
+Ensure logs directory exists
+(Render filesystem safe)
+========================================
+*/
 
-const logDir =
-path.join(__dirname, "../logs");
+const logDir = path.join(__dirname, "../logs");
 
-if (!fs.existsSync(logDir)) {
+try {
 
-  fs.mkdirSync(logDir, {
-    recursive: true
-  });
+  if (!fs.existsSync(logDir)) {
+
+    fs.mkdirSync(logDir, {
+      recursive: true
+    });
+
+  }
+
+} catch (err) {
+
+  console.error("Log directory creation failed:", err);
 
 }
 
-const logFile =
-path.join(logDir, "payments.log");
+const logFile = path.join(logDir, "payments.log");
 
+
+/*
+========================================
+Verify Payment Route
+========================================
+*/
 
 router.post("/", (req, res) => {
 
@@ -44,7 +60,11 @@ router.post("/", (req, res) => {
     } = req.body;
 
 
-    /* Validate required fields */
+    /*
+    ========================================
+    Validate required fields
+    ========================================
+    */
 
     if (
       !razorpay_order_id ||
@@ -55,7 +75,6 @@ router.post("/", (req, res) => {
       return res.status(400).json({
 
         success: false,
-
         error: "Missing payment data"
 
       });
@@ -63,33 +82,33 @@ router.post("/", (req, res) => {
     }
 
 
-    /* Verify signature using utility */
+    /*
+    ========================================
+    Verify Razorpay signature
+    ========================================
+    */
 
-    const isValid =
-      verifySignature({
+    const isValid = verifySignature({
 
-        orderId:
-          razorpay_order_id,
+      orderId: razorpay_order_id,
 
-        paymentId:
-          razorpay_payment_id,
+      paymentId: razorpay_payment_id,
 
-        signature:
-          razorpay_signature
+      signature: razorpay_signature
 
-      });
+    });
 
 
     if (!isValid) {
 
       console.warn(
-        "Invalid signature attempt"
+        "Invalid payment signature:",
+        razorpay_order_id
       );
 
       return res.status(400).json({
 
         success: false,
-
         error: "Invalid signature"
 
       });
@@ -97,58 +116,83 @@ router.post("/", (req, res) => {
     }
 
 
-    /* Prepare log entry */
+    /*
+    ========================================
+    Prepare payment log entry
+    ========================================
+    */
 
     const logEntry = {
 
-      time:
-        new Date().toISOString(),
+      time: new Date().toISOString(),
 
-      order_id:
-        razorpay_order_id,
+      order_id: razorpay_order_id,
 
-      payment_id:
-        razorpay_payment_id,
+      payment_id: razorpay_payment_id,
 
-      project:
-        projectId || "unknown",
+      project: projectId || "unknown",
 
-      amount:
-        amount || 0,
+      amount: amount || 0,
 
-      customer:
-        name || "unknown",
+      customer: name || "unknown",
 
-      email:
-        email || "unknown",
+      email: email || "unknown",
 
-      description:
-        description || "payment"
+      description: description || "payment",
+
+      ip: req.ip
 
     };
 
 
-    /* Write log */
+    /*
+    ========================================
+    Write log safely
+    ========================================
+    */
 
-    fs.appendFileSync(
+    try {
 
-      logFile,
+      fs.appendFileSync(
+        logFile,
+        JSON.stringify(logEntry) + "\n"
+      );
 
-      JSON.stringify(logEntry) + "\n"
+    } catch (logError) {
 
-    );
+      console.error(
+        "Log write failed:",
+        logError
+      );
 
+    }
+
+
+    /*
+    ========================================
+    Console log (Render logs visible)
+    ========================================
+    */
 
     console.log(
-      "Payment verified and logged:"
+      "Payment verified:",
+      logEntry.order_id
     );
 
-    console.log(logEntry);
 
+    /*
+    ========================================
+    Success response
+    ========================================
+    */
 
     res.json({
 
-      success: true
+      success: true,
+
+      message: "Payment verified",
+
+      order_id: razorpay_order_id
 
     });
 
@@ -164,8 +208,7 @@ router.post("/", (req, res) => {
 
       success: false,
 
-      error:
-        "Verification failed"
+      error: "Verification failed"
 
     });
 
