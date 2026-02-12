@@ -1,51 +1,84 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Payment Success</title>
+<head>
 
-    <style>
-      body {
-        font-family: Arial;
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 0;
-      }
+<title>Payment Success</title>
 
-      .card {
-        background: white;
-        padding: 40px;
-        border-radius: 10px;
-        text-align: center;
-        width: 350px;
-      }
-    </style>
-  </head>
+<style>
 
-  <body>
-    <div class="card">
-      <h2>Payment Successful</h2>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#2ecc71,#27ae60);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+margin:0;
+}
 
-      <p id="paymentId"></p>
+.card{
+background:white;
+padding:40px;
+border-radius:10px;
+text-align:center;
+width:350px;
+}
 
-      <button onclick="goHome()">Home</button>
-    </div>
+</style>
 
-    <script>
-      const params = new URLSearchParams(window.location.search);
+</head>
 
-      const paymentId = params.get("payment_id");
+<body>
 
-      if (paymentId) {
-        document.getElementById("paymentId").innerText =
-          "Payment ID: " + paymentId;
-      }
+<div class="card">
 
-      function goHome() {
-        window.location.href = "/";
-      }
-    </script>
-  </body>
+<h2>Payment Successful</h2>
+
+<p id="paymentId"></p>
+
+<button onclick="goHome()">Home</button>
+
+</div>
+
+<script>
+
+const params =
+new URLSearchParams(window.location.search);
+
+const paymentId =
+params.get("payment_id");
+
+
+/*
+================================
+PROFESSIONAL SECURITY CHECK
+================================
+*/
+
+if(!paymentId){
+
+window.location.href="/";
+
+}
+
+
+/*
+================================
+SHOW PAYMENT INFO
+================================
+*/
+
+document.getElementById("paymentId").innerText =
+"Payment ID: " + paymentId;
+
+
+function goHome(){
+
+window.location.href="/";
+
+}
+
+</script>
+
+</body>
 </html>

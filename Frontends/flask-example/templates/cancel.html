@@ -1,40 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Payment Cancelled</title>
+<head>
 
-    <style>
-      body {
-        font-family: Arial;
-        background: linear-gradient(135deg, #ff6b6b, #c0392b);
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 0;
-      }
+<title>Payment Cancelled</title>
 
-      .card {
-        background: white;
-        padding: 40px;
-        border-radius: 10px;
-        text-align: center;
-        width: 350px;
-      }
-    </style>
-  </head>
+<style>
 
-  <body>
-    <div class="card">
-      <h2>Payment Cancelled</h2>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#ff6b6b,#c0392b);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+margin:0;
+}
 
-      <button onclick="goHome()">Try Again</button>
-    </div>
+.card{
+background:white;
+padding:40px;
+border-radius:10px;
+text-align:center;
+width:350px;
+}
 
-    <script>
-      function goHome() {
-        window.location.href = "/";
-      }
-    </script>
-  </body>
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Payment Cancelled</h2>
+
+<button onclick="goHome()">Try Again</button>
+
+</div>
+
+<script>
+
+const params =
+new URLSearchParams(window.location.search);
+
+const reason =
+params.get("reason");
+
+
+/*
+================================
+PROFESSIONAL SECURITY CHECK
+================================
+*/
+
+if(!reason){
+
+window.location.href="/";
+
+}
+
+
+function goHome(){
+
+window.location.href="/";
+
+}
+
+</script>
+
+</body>
 </html>
