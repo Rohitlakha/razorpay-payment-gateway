@@ -2,14 +2,6 @@
 ========================================
 Allowed student projects configuration
 ========================================
-
-Each project can have:
-
-- name (display name)
-- description (optional)
-- active (enable/disable project)
-
-========================================
 */
 
 module.exports = {
@@ -49,6 +41,16 @@ module.exports = {
     name: "Flask Course Project",
 
     description: "Course fee payments",
+
+    active: true
+
+  },
+
+  custom_payment: {
+
+    name: "Custom Payment System",
+
+    description: "Dynamic user input payments",
 
     active: true
 
