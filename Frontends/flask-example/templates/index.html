@@ -17,139 +17,84 @@
 
 <style>
 
-/* ===== Background ===== */
+/* Background */
 
 body {
-
   margin: 0;
   padding: 0;
-
   font-family: Arial, Helvetica, sans-serif;
-
   background: linear-gradient(135deg, #667eea, #764ba2);
-
   height: 100vh;
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
 }
 
-
-/* ===== Card Container ===== */
+/* Card */
 
 .payment-card {
-
   background: white;
-
   padding: 40px;
-
   border-radius: 12px;
-
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-
   width: 350px;
-
   text-align: center;
-
 }
 
-
-/* ===== Title ===== */
+/* Title */
 
 .title {
-
   font-size: 24px;
-
   font-weight: bold;
-
   color: #333;
-
   margin-bottom: 10px;
-
 }
 
-
-/* ===== Description ===== */
+/* Description */
 
 .description {
-
   color: #777;
-
   margin-bottom: 20px;
-
 }
 
-
-/* ===== Amount ===== */
+/* Amount */
 
 .amount {
-
   font-size: 32px;
-
   font-weight: bold;
-
   color: #2ecc71;
-
   margin-bottom: 25px;
-
 }
 
-
-/* ===== Button ===== */
+/* Button */
 
 .pay-btn {
-
   background: #3399cc;
-
   color: white;
-
   border: none;
-
   padding: 14px;
-
   font-size: 16px;
-
   border-radius: 8px;
-
   cursor: pointer;
-
   width: 100%;
-
   transition: 0.3s;
-
 }
-
 
 .pay-btn:hover {
-
   background: #287ca1;
-
 }
-
 
 .pay-btn:disabled {
-
   background: gray;
-
   cursor: not-allowed;
-
 }
 
-
-/* ===== Status Text ===== */
+/* Status */
 
 .status {
-
   margin-top: 15px;
-
   font-size: 14px;
-
   color: #555;
-
 }
 
 </style>
@@ -186,9 +131,7 @@ body {
 <script>
 
 const button = document.getElementById("payBtn");
-
 const status = document.getElementById("status");
-
 
 button.addEventListener("click", pay);
 
@@ -200,7 +143,6 @@ async function pay() {
     if (!window.RazorpayGateway) {
 
       status.innerText = "Payment system not loaded. Refresh page.";
-
       return;
 
     }
@@ -212,12 +154,24 @@ async function pay() {
 
     await RazorpayGateway.startPayment({
 
+      /* Dynamic Payment Amount */
       amount: 500,
 
-      backendUrl: "http://localhost:4343",
+      /* Project ID (important for multi-project support) */
+      projectId: "college_fee",
 
+      /* Customer info */
+      name: "Rohit Lakha",
+      email: "rohit@email.com",
+
+      /* Description */
+      description: "College Fee Payment",
+
+      /* Correct backend URL */
+      backendUrl: "http://localhost:5000",
+
+      /* Redirect URLs */
       successUrl: "http://localhost:5000/success",
-
       cancelUrl: "http://localhost:5000/cancel"
 
     });

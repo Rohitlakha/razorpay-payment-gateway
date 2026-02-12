@@ -10,63 +10,38 @@
 
 <style>
 
-/* Background */
-
 body {
 
   margin: 0;
   padding: 0;
-
   font-family: Arial, Helvetica, sans-serif;
-
   background: linear-gradient(135deg, #2ecc71, #27ae60);
-
   height: 100vh;
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
 
 }
 
-
-/* Card */
-
 .container {
 
   background: white;
-
   padding: 40px;
-
   border-radius: 12px;
-
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-
   text-align: center;
-
   width: 350px;
 
 }
 
-
-/* Icon */
-
 .icon {
 
   font-size: 70px;
-
   color: #2ecc71;
-
   margin-bottom: 15px;
-
   animation: pop 0.5s ease;
 
 }
-
-
-/* Animation */
 
 @keyframes pop {
 
@@ -82,74 +57,54 @@ body {
 
 }
 
-
-/* Title */
-
 .title {
 
   font-size: 24px;
-
   font-weight: bold;
-
   color: #333;
-
   margin-bottom: 10px;
 
 }
-
-
-/* Message */
 
 .message {
 
   color: #666;
-
   margin-bottom: 10px;
 
 }
 
-
-/* Redirect text */
-
 .redirect {
 
   font-size: 13px;
-
   color: #999;
-
   margin-bottom: 20px;
 
 }
 
-
-/* Button */
-
 .button {
 
   background: #3399cc;
-
   color: white;
-
   border: none;
-
   padding: 12px;
-
   font-size: 16px;
-
   border-radius: 8px;
-
   cursor: pointer;
-
   width: 100%;
-
   transition: 0.3s;
 
 }
 
-
 .button:hover {
 
   background: #287ca1;
+
+}
+
+.error {
+
+  color: red;
+  margin-top: 10px;
 
 }
 
@@ -161,32 +116,108 @@ body {
 
 <div class="container">
 
-  <div class="icon">
-    ✅
+  <div class="icon">✅</div>
+
+  <div class="title">Payment Successful</div>
+
+  <div class="message" id="message">
+    Verifying your payment...
   </div>
 
-  <div class="title">
-    Payment Successful
-  </div>
-
-  <div class="message">
-    Your payment was completed successfully.
-  </div>
-
-  <div class="redirect">
-    Redirecting to home page in 3 seconds...
+  <div class="redirect" id="redirectText">
+    Please wait...
   </div>
 
   <button class="button" onclick="goHome()">
     Back to Home
   </button>
 
+  <div class="error" id="error"></div>
+
 </div>
 
 
 <script>
 
-/* Manual redirect */
+/* BACKEND URL */
+const backendUrl = "http://localhost:5000";
+
+
+/* Get Razorpay response from URL */
+const urlParams = new URLSearchParams(window.location.search);
+
+const razorpay_order_id = urlParams.get("razorpay_order_id");
+const razorpay_payment_id = urlParams.get("razorpay_payment_id");
+const razorpay_signature = urlParams.get("razorpay_signature");
+
+
+/* Verify payment */
+
+async function verifyPayment() {
+
+  try {
+
+    if (!razorpay_order_id ||
+        !razorpay_payment_id ||
+        !razorpay_signature) {
+
+      document.getElementById("error").innerText =
+        "Payment verification data missing.";
+
+      return;
+
+    }
+
+    const res = await fetch(backendUrl + "/verify-payment", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+
+      })
+
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      document.getElementById("message").innerText =
+        "Your payment was completed successfully.";
+
+      document.getElementById("redirectText").innerText =
+        "Redirecting to home page in 3 seconds...";
+
+      setTimeout(goHome, 3000);
+
+    }
+    else {
+
+      document.getElementById("error").innerText =
+        "Payment verification failed.";
+
+    }
+
+  }
+  catch (err) {
+
+    document.getElementById("error").innerText =
+      "Verification error.";
+
+  }
+
+}
+
+
+/* Go Home */
 
 function goHome() {
 
@@ -195,13 +226,9 @@ function goHome() {
 }
 
 
-/* Auto redirect */
+/* Run verification */
 
-setTimeout(function() {
-
-  window.location.href = "/";
-
-}, 3000);
+verifyPayment();
 
 </script>
 

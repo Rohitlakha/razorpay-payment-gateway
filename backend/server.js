@@ -20,9 +20,7 @@ app.use(
 );
 
 app.use(cors());
-
 app.use(express.json());
-
 app.use(limiter);
 
 /* SERVE SDK */
@@ -37,18 +35,20 @@ const verifyPayment = require("./routes/verify-payment");
 app.use("/create-order", createOrder);
 app.use("/verify-payment", verifyPayment);
 
-/* HEALTH */
+/* HEALTH CHECK */
 
 app.get("/", (req, res) => {
+
   res.json({
-    status: "Razorpay Gateway Running",
-    sdk: "http://localhost:4343/sdk/razorpay-sdk.js"
+    status: "Gateway Running",
+    sdk: process.env.BASE_URL + "/sdk/razorpay-sdk.js"
   });
+
 });
 
-/* START */
+/* START SERVER */
 
-const PORT = process.env.PORT || 4343;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
 

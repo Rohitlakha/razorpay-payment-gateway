@@ -1,16 +1,39 @@
 (function () {
 
+  /* Prevent duplicate loading */
   if (window.RazorpayGateway) return;
 
   console.log("Razorpay SDK Loaded");
 
   window.RazorpayGateway = {
 
-    startPayment: async function(config) {
+    startPayment: async function (config) {
 
       try {
 
-        const backendUrl = config.backendUrl || "http://localhost:4343";
+        /* VALIDATION */
+
+        if (!config || !config.amount) {
+
+          alert("Payment amount is required");
+          return;
+
+        }
+
+        if (!config.successUrl || !config.cancelUrl) {
+
+          alert("Success and Cancel URLs are required");
+          return;
+
+        }
+
+
+        /* BACKEND URL */
+
+        const backendUrl =
+          config.backendUrl ||
+          window.location.origin ||
+          "http://localhost:5000";
 
 
         /* CREATE ORDER */
@@ -26,18 +49,22 @@
           body: JSON.stringify({
 
             amount: config.amount,
-
-            projectId: config.projectId,
-
-            name: config.name,
-
-            email: config.email,
-
-            description: config.description
+            projectId: config.projectId || "default",
+            name: config.name || "",
+            email: config.email || "",
+            description: config.description || "Payment"
 
           })
 
         });
+
+
+        if (!res.ok) {
+
+          alert("Failed to connect to payment server");
+          return;
+
+        }
 
 
         const data = await res.json();
@@ -46,24 +73,13 @@
         if (!data.orderId) {
 
           alert("Order creation failed");
-
           console.error(data);
-
           return;
 
         }
 
 
-        if (!window.Razorpay) {
-
-          alert("Razorpay SDK not loaded");
-
-          return;
-
-        }
-
-
-        /* PAYMENT OPTIONS */
+        /* RAZORPAY OPTIONS */
 
         const options = {
 
@@ -80,27 +96,59 @@
           order_id: data.orderId,
 
 
-          handler: function () {
+          /* SUCCESS HANDLER */
 
-            if (config.successUrl)
-              window.location.href = config.successUrl;
+          handler: function (response) {
+
+            const params =
+              "?razorpay_order_id=" + response.razorpay_order_id +
+              "&razorpay_payment_id=" + response.razorpay_payment_id +
+              "&razorpay_signature=" + response.razorpay_signature;
+
+
+            window.location.href = config.successUrl + params;
 
           },
 
+
+          /* CANCEL HANDLER */
 
           modal: {
 
             ondismiss: function () {
 
-              if (config.cancelUrl)
-                window.location.href = config.cancelUrl;
+              window.location.href =
+                config.cancelUrl +
+                "?reason=cancelled_by_user";
 
             }
+
+          },
+
+
+          /* OPTIONAL PREFILL */
+
+          prefill: {
+
+            name: config.name || "",
+
+            email: config.email || ""
+
+          },
+
+
+          /* THEME */
+
+          theme: {
+
+            color: "#3399cc"
 
           }
 
         };
 
+
+        /* OPEN PAYMENT WINDOW */
 
         const rzp = new Razorpay(options);
 
@@ -109,9 +157,9 @@
       }
       catch (err) {
 
-        console.error(err);
+        console.error("Payment Error:", err);
 
-        alert("Payment failed");
+        alert("Payment failed. Please try again.");
 
       }
 
