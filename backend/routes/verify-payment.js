@@ -15,23 +15,41 @@ router.post("/", (req, res) => {
 
     } = req.body;
 
+
+    if (!razorpay_order_id ||
+        !razorpay_payment_id ||
+        !razorpay_signature) {
+
+      return res.status(400).json({
+        success: false,
+        error: "Missing payment data"
+      });
+
+    }
+
+
     const body = razorpay_order_id + "|" + razorpay_payment_id;
+
 
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body)
       .digest("hex");
 
+
     if (expectedSignature === razorpay_signature) {
 
       res.json({
-        success: true
+        success: true,
+        message: "Payment verified"
       });
 
-    } else {
+    }
+    else {
 
       res.status(400).json({
-        success: false
+        success: false,
+        message: "Invalid signature"
       });
 
     }
@@ -39,7 +57,10 @@ router.post("/", (req, res) => {
   }
   catch (error) {
 
+    console.error(error);
+
     res.status(500).json({
+      success: false,
       error: "Verification failed"
     });
 

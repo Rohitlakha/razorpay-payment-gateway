@@ -12,6 +12,7 @@
 
         const backendUrl = config.backendUrl || "http://localhost:4343";
 
+
         /* CREATE ORDER */
 
         const res = await fetch(backendUrl + "/create-order", {
@@ -23,12 +24,24 @@
           },
 
           body: JSON.stringify({
-            amount: config.amount
+
+            amount: config.amount,
+
+            projectId: config.projectId,
+
+            name: config.name,
+
+            email: config.email,
+
+            description: config.description
+
           })
 
         });
 
+
         const data = await res.json();
+
 
         if (!data.orderId) {
 
@@ -40,7 +53,6 @@
 
         }
 
-        /* CHECK RAZORPAY LOADED */
 
         if (!window.Razorpay) {
 
@@ -50,7 +62,8 @@
 
         }
 
-        /* OPTIONS */
+
+        /* PAYMENT OPTIONS */
 
         const options = {
 
@@ -66,23 +79,28 @@
 
           order_id: data.orderId,
 
+
           handler: function () {
 
-            window.location.href = config.successUrl;
+            if (config.successUrl)
+              window.location.href = config.successUrl;
 
           },
+
 
           modal: {
 
             ondismiss: function () {
 
-              window.location.href = config.cancelUrl;
+              if (config.cancelUrl)
+                window.location.href = config.cancelUrl;
 
             }
 
           }
 
         };
+
 
         const rzp = new Razorpay(options);
 

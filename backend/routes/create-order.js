@@ -3,18 +3,30 @@ const Razorpay = require("razorpay");
 
 const router = express.Router();
 
-const razorpay = new Razorpay({
+const projects = require("../config/projects");
 
+const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
-
 });
+
 
 router.post("/", async (req, res) => {
 
   try {
 
-    const { amount } = req.body;
+    const {
+
+      amount,
+      projectId,
+      name,
+      email,
+      description
+
+    } = req.body;
+
+
+    /* VALIDATION */
 
     if (!amount) {
 
@@ -24,24 +36,60 @@ router.post("/", async (req, res) => {
 
     }
 
-    const options = {
+
+    /* PROJECT VALIDATION */
+
+    let projectName = "Student Payment";
+    let currency = "INR";
+
+    if (projectId && projects[projectId]) {
+
+      projectName = projects[projectId].name;
+      currency = projects[projectId].currency;
+
+    }
+
+
+    /* CREATE ORDER */
+
+    const order = await razorpay.orders.create({
 
       amount: amount * 100,
-      currency: "INR",
-      receipt: "receipt_" + Date.now()
 
-    };
+      currency: currency,
 
-    const order = await razorpay.orders.create(options);
+      receipt: "receipt_" + Date.now(),
+
+      notes: {
+
+        projectId: projectId || "default",
+
+        name: name || "",
+
+        email: email || "",
+
+        description: description || ""
+
+      }
+
+    });
+
+
+    /* RESPONSE (COMPATIBLE WITH YOUR SDK) */
 
     res.json({
 
       orderId: order.id,
+
       amount: order.amount,
+
       currency: order.currency,
+
       key: process.env.RAZORPAY_KEY_ID,
-      name: "Student Payment",
-      description: "Course Fee"
+
+      name: projectName,
+
+      description: description || projectName
 
     });
 
