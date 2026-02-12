@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -80,11 +81,15 @@ button:hover {
 
 <div class="card">
 
-<h3>{{product.name}}</h3>
+<h3>{{ product.name }}</h3>
 
-<div class="price">₹{{product.price}}</div>
+<div class="price">₹{{ product.price }}</div>
 
-<button onclick="pay('{{product.name}}',{{product.price}})">
+<!-- FIXED BUTTON -->
+<button
+  data-name="{{ product.name }}"
+  data-price="{{ product.price }}"
+  onclick="pay(this)">
 Buy Now
 </button>
 
@@ -98,27 +103,32 @@ Buy Now
 
 <script>
 
-function pay(name, price) {
+/* SAFE PAYMENT FUNCTION */
 
-RazorpayGateway.startPayment({
+function pay(button) {
 
-amount: price,
+  const name = button.dataset.name;
+  const price = Number(button.dataset.price);
 
-projectId: "ecommerce_store",
+  RazorpayGateway.startPayment({
 
-name: "Customer",
+    amount: price,
 
-email: "customer@email.com",
+    projectId: "ecommerce_store",
 
-description: name,
+    name: "Customer",
 
-backendUrl: "http://localhost:5000",
+    email: "customer@email.com",
 
-successUrl: window.location.href,
+    description: name,
 
-cancelUrl: window.location.href
+    backendUrl: "http://localhost:5000",
 
-});
+    successUrl: window.location.href,
+
+    cancelUrl: window.location.href
+
+  });
 
 }
 

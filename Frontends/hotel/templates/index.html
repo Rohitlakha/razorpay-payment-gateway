@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Hotel Booking</title>
 
@@ -28,6 +32,7 @@ body {
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 button {
@@ -36,6 +41,7 @@ button {
   border: none;
   padding: 10px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
@@ -60,15 +66,19 @@ Hotel Booking
 
 <div>
 
-<b>{{room.type}}</b>
+<b>{{ room.type }}</b>
 
 <br>
 
-₹{{room.price}}
+₹{{ room.price }}
 
 </div>
 
-<button onclick="pay('{{room.type}}',{{room.price}})">
+<!-- FIXED BUTTON -->
+<button
+  data-type="{{ room.type }}"
+  data-price="{{ room.price }}"
+  onclick="pay(this)">
 Book Now
 </button>
 
@@ -80,27 +90,32 @@ Book Now
 
 <script>
 
-function pay(type, price) {
+/* SAFE PAYMENT FUNCTION */
 
-RazorpayGateway.startPayment({
+function pay(button) {
 
-amount: price,
+  const type = button.dataset.type;
+  const price = Number(button.dataset.price);
 
-projectId: "hotel_management",
+  RazorpayGateway.startPayment({
 
-name: "Guest",
+    amount: price,
 
-email: "guest@email.com",
+    projectId: "hotel_management",
 
-description: type,
+    name: "Guest",
 
-backendUrl: "http://localhost:5000",
+    email: "guest@email.com",
 
-successUrl: window.location.href,
+    description: type,
 
-cancelUrl: window.location.href
+    backendUrl: "http://localhost:5000",
 
-});
+    successUrl: window.location.href,
+
+    cancelUrl: window.location.href
+
+  });
 
 }
 

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>College Fees</title>
 
@@ -28,6 +32,7 @@ body {
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 button {
@@ -36,6 +41,7 @@ button {
   color: white;
   padding: 8px 15px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
@@ -60,15 +66,19 @@ College Fee Payment
 
 <div>
 
-<b>{{fee.type}}</b>
+<b>{{ fee.type }}</b>
 
 <br>
 
-₹{{fee.amount}}
+₹{{ fee.amount }}
 
 </div>
 
-<button onclick="pay('{{fee.type}}',{{fee.amount}})">
+<!-- FIXED BUTTON -->
+<button
+  data-type="{{ fee.type }}"
+  data-amount="{{ fee.amount }}"
+  onclick="pay(this)">
 Pay
 </button>
 
@@ -80,27 +90,32 @@ Pay
 
 <script>
 
-function pay(type, amount) {
+/* SAFE PAYMENT FUNCTION */
 
-RazorpayGateway.startPayment({
+function pay(button) {
 
-amount: amount,
+  const type = button.dataset.type;
+  const amount = Number(button.dataset.amount);
 
-projectId: "college_fee",
+  RazorpayGateway.startPayment({
 
-name: "Student",
+    amount: amount,
 
-email: "student@email.com",
+    projectId: "college_fee",
 
-description: type,
+    name: "Student",
 
-backendUrl: "http://localhost:5000",
+    email: "student@email.com",
 
-successUrl: window.location.href,
+    description: type,
 
-cancelUrl: window.location.href
+    backendUrl: "http://localhost:5000",
 
-});
+    successUrl: window.location.href,
+
+    cancelUrl: window.location.href
+
+  });
 
 }
 
